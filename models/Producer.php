@@ -4,11 +4,11 @@ namespace app\models;
 
 use yii\db\ActiveRecord;
 
-class Category extends ActiveRecord
+class Producer extends ActiveRecord
 { 
     public static function tableName()
     {
-        return '{{Category}}';
+        return '{{Producer}}';
     }
 
     /**
@@ -17,6 +17,7 @@ class Category extends ActiveRecord
     public function rules()
     {
         return [
+            // [['beginner', 'text', 'closed', 'closed_date'], 'safe'],
         ];
     }
 
@@ -28,4 +29,6 @@ class Category extends ActiveRecord
         return [
 	    ];
     }
+
+
 }
