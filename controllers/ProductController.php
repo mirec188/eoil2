@@ -7,16 +7,6 @@ use \Yii;
 
 class ProductController extends ActiveController
 {
-	protected function verbs() {
-		$verbs = parent::verbs();
-		$verbs =  [
-			'index' => ['GET', 'POST', 'HEAD'],
-			'view' => ['GET', 'HEAD'],
-			'create' => ['POST'],
-			'update' => ['PUT', 'PATCH']
-		];
-	  	return $verbs;
-	}
 
 	public $modelClass = 'app\models\Product';
 
@@ -36,10 +26,12 @@ class ProductController extends ActiveController
     }
 
     public function actionDetail($productId) {
-    	$product = \app\models\Product::find($productId)->one();
+
+    	$product = \app\models\Product::find()->where(['id'=>$productId])->one();
+
     	$viscosity = $product->viscosity;
 
-    	return [
+    	$result= [
 			'id'=>$product->id,
     		'name'=>$product->name,
     		'fullName'=>$product->getFullName(true, true),
@@ -50,6 +42,9 @@ class ProductController extends ActiveController
     			'name'=>$viscosity->name
     		]
     	];
+
+        return $result;
+
     }
 
     public function actionFindAll($name = false, $fulltext = false, $viscosity = false, $categories = false, $limit = 5) {
@@ -114,19 +109,56 @@ class ProductController extends ActiveController
     }
 
     public function actionAlternatives($productId) {
-    	$q = "SELECT * FROM product_alternative WHERE product_id=$productId";
+        // var_dump($this->request->isPost);
+        // die();
+       if ($this->request->isPost) {
+           return $this->saveAlternatives($productId);
+       }
 
-    	$ids = \Yii::$app->db->createCommand($q)->queryAll();
-    	if (!$ids) return [];
+       if ($this->request->isGet) {
+           return $this->getAlternatives($productId);
+       }
+    }
 
-    	$result = [];
-    	foreach ($ids as $alternativeId) {
-    		$alternative = $this->actionDetail($alternativeId);
-    		$result[] = $alternative;
-    	}
+  
+    private function saveAlternatives($productId) {
+        $params = \Yii::$app->getRequest()->getBodyParams();
 
-    	return $result;
+        $tr = Yii::$app->db->beginTransaction();
 
+        try {
+            $q = "DELETE FROM product_alternative WHERE product_id=$productId";          
+            \Yii::$app->db->createCommand($q)->execute();
+
+            foreach ($params['alternatives'] as $alternativeId) {
+                $q = "INSERT INTO product_alternative (product_id, alternative_id) values ($productId, $alternativeId)";
+                \Yii::$app->db->createCommand($q)->execute($q);
+            }
+            $tr->commit();
+
+        } catch (Exception $e) {
+            //RollBACK
+            $tr->rollBack();
+            return ['error']['had to rollback'];
+        }
+
+        return $this->getAlternatives($productId);
+    }
+
+    private function getAlternatives($productId) {
+        $q = "SELECT * FROM product_alternative WHERE product_id=$productId";
+
+        $ids = \Yii::$app->db->createCommand($q)->queryAll();
+        if (!$ids) return [];
+
+
+        $result = [];
+        foreach ($ids as $alternativeId) {
+            $alternative = $this->actionDetail($alternativeId['alternative_id']);
+            $result[] = $alternative;
+        }
+
+        return $result;
     }
 
 }
