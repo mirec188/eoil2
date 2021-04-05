@@ -126,12 +126,23 @@ class ProductController extends ActiveController
 
         $tr = Yii::$app->db->beginTransaction();
 
+        $alternativeIds=array_keys($params['alternatives']);
+        $alternativeIds[]=9999999;
+        $alternativeIdsSql=implode(',', $alternativeIds);
+        
         try {
-            $q = "DELETE FROM product_alternative WHERE product_id=$productId";          
+            $q = "DELETE FROM product_alternative WHERE product_id=$productId and alternative_id not in ($alternativeIdsSql)";          
             \Yii::$app->db->createCommand($q)->execute();
 
+            $q = "DELETE FROM product_alternative WHERE alternative_id=$productId and product_id not in ($alternativeIdsSql)";          
+            \Yii::$app->db->createCommand($q)->execute();
+
+
             foreach ($params['alternatives'] as $alternativeId) {
-                $q = "INSERT INTO product_alternative (product_id, alternative_id) values ($productId, $alternativeId)";
+                $q = "replace INTO product_alternative (product_id, alternative_id) values ($productId, $alternativeId)";
+                \Yii::$app->db->createCommand($q)->execute($q);
+
+                $q = "replace INTO product_alternative (product_id, alternative_id) values ($alternativeId, $productId)";
                 \Yii::$app->db->createCommand($q)->execute($q);
             }
             $tr->commit();
@@ -139,6 +150,7 @@ class ProductController extends ActiveController
         } catch (Exception $e) {
             //RollBACK
             $tr->rollBack();
+            print_r($e);
             return ['error']['had to rollback'];
         }
 
@@ -146,7 +158,7 @@ class ProductController extends ActiveController
     }
 
     private function getAlternatives($productId) {
-        $q = "SELECT * FROM product_alternative WHERE product_id=$productId";
+        $q = "SELECT distinct alternative_id FROM product_alternative WHERE product_id=$productId";
 
         $ids = \Yii::$app->db->createCommand($q)->queryAll();
         if (!$ids) return [];
