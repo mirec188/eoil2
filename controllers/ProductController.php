@@ -37,10 +37,7 @@ class ProductController extends ActiveController
     		'fullName'=>$product->getFullName(true, true),
     		'active'=>$product->isActive(),
     		'categories'=>[],
-    		'viscosity'=>[
-    			'id'=>$viscosity->id,
-    			'name'=>$viscosity->name
-    		]
+    		'viscosity'=>$viscosity ? $viscosity->getAttributes() : false
     	];
 
         return $result;
