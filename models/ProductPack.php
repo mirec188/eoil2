@@ -30,5 +30,16 @@ class ProductPack extends ActiveRecord
 	    ];
     }
 
+    public static function findByEid($eidType, $eId) {
+
+        $q = "SELECT modelId FROM ExternalId WHERE model='ProductHasPack' AND value=:value AND typeId = :eidType";
+        $result = \Yii::$app->db->createCommand($q, ['value'=>$eId, 'eidType'=>$eidType])->queryScalar();
+        
+        if ($result) {
+            return self::findOne(['id'=>$result]);
+        }
+
+    }
+
 
 }

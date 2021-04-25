@@ -27,14 +27,34 @@ class ImportSupplierPricesController extends Controller
      */
     public function actionIndex($path)
     {   
+        
+        
+        // print_r($result);
+
         $data = $this->parseCsvFile($path);
+
         $this->import($data);
     }
 
 
     private function import($data) {
+        $spService = new \app\services\SupplierPackService();
+
         foreach ($data as $row) {
-            $pp = \app\models\ProductPack::find($row['eId']);
+            $pp = \app\models\ProductPack::findByEid($row['eIdType'], $row['eId']);
+
+            if (!$pp) {
+                echo "skipping ".$row['eId'].' with type id '.$row['eIdType']." - could not find product pack \n";
+            } else {
+                echo 'found '.$pp->id.' for '.$row['eId'].' with type id '.$row['eIdType']."\n";
+
+                $result = $spService->updatePackSupplierPrice($pp,$row['supplierId'],$row['price']);
+
+                $result2 = $spService->updatePackSupplier($pp, $row['supplierId']);
+
+            }
+            
+
             
         }
     }
@@ -47,6 +67,9 @@ class ImportSupplierPricesController extends Controller
             while (($data = fgetcsv($handle, 1000, ";")) !== FALSE) {
                $tmp['eId'] = $data[0];
                $tmp['price'] = $this->sanitazePrice($data[1]);
+               $tmp['supplierId'] = $data[2];
+               $tmp['eIdType'] = $data[3];
+
                $return[] = $tmp;
             }
             fclose($handle);

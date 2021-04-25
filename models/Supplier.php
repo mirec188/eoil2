@@ -4,11 +4,11 @@ namespace app\models;
 
 use yii\db\ActiveRecord;
 
-class SupplierPack extends ActiveRecord
+class Supplier extends ActiveRecord
 { 
     public static function tableName()
     {
-        return '{{SupplierHasPack}}';
+        return '{{Supplier}}';
     }
 
     /**
@@ -17,7 +17,7 @@ class SupplierPack extends ActiveRecord
     public function rules()
     {
         return [
-             [['id', 'productHasPackId', 'price', 'supplierId'], 'safe'],
+            // [['beginner', 'text', 'closed', 'closed_date'], 'safe'],
         ];
     }
 
