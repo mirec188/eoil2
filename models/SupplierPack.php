@@ -17,8 +17,13 @@ class SupplierPack extends ActiveRecord
     public function rules()
     {
         return [
-             [['id', 'productHasPackId', 'price', 'supplierId'], 'safe'],
+             [['id', 'productHasPackId', 'price', 'supplierId', 'modifiedBy'], 'safe'],
         ];
+    }
+
+    public function beforeSave($insert) {
+        $this->modifiedBy = 'admin';
+        return parent::beforeSave($insert);
     }
 
     /**
