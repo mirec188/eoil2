@@ -16,7 +16,7 @@ class m210519_190902_cart_checkbox extends Migration
         
          \Yii::$app->db->createCommand("
 
-            ALTER TABLE `cart`
+            ALTER TABLE `Cart`
 ADD `in_stock` tinyint NULL;
 
         ")->execute();
