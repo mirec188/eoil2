@@ -155,7 +155,7 @@ class ProductController extends ActiveController
     }
 
     private function getAlternatives($productId) {
-        $ids = $this->getAlternativeIds($productId, true);
+        $ids = $this->getAlternativeIds($productId, false);
         $idsDirect = $this->getAlternativeIds($productId, false);
 
         $directIds = $idsDirect;
