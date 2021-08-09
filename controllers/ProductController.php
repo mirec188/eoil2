@@ -144,7 +144,7 @@ class ProductController extends ActiveController
             }
             $tr->commit();
 
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             //RollBACK
             $tr->rollBack();
             print_r($e);
@@ -155,7 +155,7 @@ class ProductController extends ActiveController
     }
 
     private function getAlternatives($productId) {
-        $ids = $this->getAlternativeIds($productId, false);
+        $ids = $this->getAlternativeIds($productId, true);
         $idsDirect = $this->getAlternativeIds($productId, false);
 
         $directIds = $idsDirect;
@@ -165,40 +165,28 @@ class ProductController extends ActiveController
         if (!$ids) return [];
 
         foreach ($directIds as $alternativeId) {
-            $alternative = $this->actionDetail($alternativeId);
-            $alternative['direct'] = true;
-            $result[] = $alternative;
+            if ($alternativeId != $productId) {
+                $alternative = $this->actionDetail($alternativeId);
+                $alternative['direct'] = true;
+                $result[] = $alternative;
+            }
         }
 
         foreach ($indirectIds as $alternativeId) {
-            $alternative = $this->actionDetail($alternativeId);
-            $alternative['direct'] = false;
-            $result[] = $alternative;
+            if ($alternativeId != $productId) {
+                $alternative = $this->actionDetail($alternativeId);
+                $alternative['direct'] = false;
+                $result[] = $alternative;
+            }
         }
 
         return $result;
     }
 
-    private function getAlternativeIds($productId, $resucrsive = false, $except = null) {
-        $exceptSql = "";
-        $indirect = false;
+    private function getAlternativeIds($productId, $resucrsive = false) {
+       $service = new \app\services\ProductService();
+       return $service->getAlternativeIds($productId, $resucrsive);
 
-        if ($except) {
-            $indirect=true;
-            $exceptSql = "AND alternative_id not in (".implode(",", $except).")";
-        }
-
-        $q = "SELECT distinct alternative_id FROM product_alternative WHERE product_id=$productId $exceptSql";
-        
-        $ids = \Yii::$app->db->createCommand($q)->queryColumn();
-        
-        if ($resucrsive) {
-            foreach ($ids as $altId) {
-                $ids = array_merge($ids, $this->getAlternativeIds($altId, true, array_merge($ids, [$productId])));
-            }
-        }
-    
-        return $ids;
     }
 
 }
