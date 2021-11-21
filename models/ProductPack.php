@@ -33,10 +33,10 @@ class ProductPack extends ActiveRecord
     public static function findByEid($eidType, $eId) {
 
         $q = "SELECT modelId FROM ExternalId WHERE model='ProductHasPack' AND value=:value AND typeId = :eidType";
-        $result = \Yii::$app->db->createCommand($q, ['value'=>$eId, 'eidType'=>$eidType])->queryScalar();
+        $result = \Yii::$app->db->createCommand($q, ['value'=>$eId, 'eidType'=>$eidType])->queryColumn();
         
         if ($result) {
-            return self::findOne(['id'=>$result]);
+            return self::findAll(['id' => $result]);
         }
 
     }
@@ -46,7 +46,7 @@ class ProductPack extends ActiveRecord
     public function getLowestPrice() {
         $return = 0;
         $q = "
-            SELECT round(min(purchasePrice),2) As purchasePrice FROM " . SupplierHasPack::tableName() . "
+            SELECT round(min(purchasePrice),2) As purchasePrice FROM " . SupplierPack::tableName() . "
             WHERE productHasPackId = {$this->id}
         ";
         $result = Yii::$app->db->createCommand($q)->queryAll();
@@ -59,7 +59,7 @@ class ProductPack extends ActiveRecord
     public function getAveragePrice() {
         $return = 0;
         $q = "
-            SELECT round(avg(purchasePrice),2) As purchasePrice FROM " . SupplierHasPack::tableName() . "
+            SELECT round(avg(purchasePrice),2) As purchasePrice FROM " . SupplierPack::tableName() . "
             WHERE productHasPackId = {$this->id}
         ";
         $result = Yii::$app->db->createCommand($q)->queryAll();
@@ -72,7 +72,7 @@ class ProductPack extends ActiveRecord
     public function getSupplierPrice() {
         $shp = SupplierPack::findOne(array('productHasPackId' => $this->id, 'supplierId' => $this->supplierId));
 
-        if ($shp && $shp instanceof SupplierHasPack)
+        if ($shp && $shp instanceof SupplierPack)
             return $shp->purchasePrice; else
             return false;
     }

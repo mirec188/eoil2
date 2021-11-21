@@ -46,15 +46,14 @@ class ImportSupplierPricesController extends Controller
             if (!$pp) {
                 echo "skipping ".$row['eId'].' with type id '.$row['eIdType']." - could not find product pack \n";
             } else {
-                echo 'found '.$pp->id.' for '.$row['eId'].' with type id '.$row['eIdType']."\n";
-
-                $result = $spService->updatePackSupplierPrice($pp,$row['supplierId'],$row['price']);
-
-                $result2 = $spService->updatePackSupplier($pp, $row['supplierId']);
+                foreach ($pp as $p) {
+                    echo 'found '.$p->id.' for '.$row['eId'].' with type id '.$row['eIdType']."\n";
+                
+                    $result = $spService->updatePackSupplierPrice($p,$row['supplierId'],$row['price']);
+                    $result2 = $spService->updatePackSupplier($p, $row['supplierId']);
+                }
 
             }
-            
-
             
         }
     }
