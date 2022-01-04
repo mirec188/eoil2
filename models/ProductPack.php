@@ -30,6 +30,19 @@ class ProductPack extends ActiveRecord
 	    ];
     }
 
+    public function getFullName() {
+        return str_replace(' SAE ', ' ', $this->getName() . ' ' . $this->pack->getName());
+    }
+
+    public function getName($viscosity = true) {
+        return
+            str_replace(' SAE ', ' ', 
+                $this->product->producer->name . ' '
+                . $this->product->name . ' '
+                . ($this->product->viscosity&&$viscosity ? $this->product->viscosity->name : '')
+            );
+    }
+
     public static function findByEid($eidType, $eId) {
 
         $q = "SELECT modelId FROM ExternalId WHERE model='ProductHasPack' AND value=:value AND typeId = :eidType";
@@ -241,7 +254,11 @@ class ProductPack extends ActiveRecord
     }
 
     public function getPack() {
-        return $this->hasOne(Pack::className(), ['id' => 'packId']);
+        return $this->hasOne(Pack::class, ['id' => 'packId']);
+    }
+
+    public function getProduct() {
+        return $this->hasOne(Product::class, ['id' => 'productId']);
     }
 
 
