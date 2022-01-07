@@ -32,6 +32,8 @@ class PackageController extends ActiveController
 
         $packQuery = ProductPack::find();
 
+        $packQuery->andWhere('active = 1');
+
         if ($this->request->getMethod() == 'POST' && $json = json_decode(Yii::$app->request->getRawBody(), true)) {
             $this->updateCondition($packQuery, $json);
         }
@@ -106,6 +108,7 @@ class PackageController extends ActiveController
         $categories = $this->getCategories($pack);
         $specifications = $this->getSpecifications($pack);
         $additionalAttributes = $this->getAdditionalAttributes($pack);
+        $viscosity = $this->getViscosity($pack);
         return $item = [
             'id'=>$pack->id,
             'fullName'=>$pack->getFullName(true, true),
@@ -128,10 +131,7 @@ class PackageController extends ActiveController
                     "name"=>$pack->product->producer->name,
                 ],
     
-                "viscosity"=> [
-                    "id"=>$pack->product->viscosity->id,
-                    "name"=>$pack->product->viscosity->name,
-                ],
+                "viscosity"=> $viscosity,
     
                 "specifications"=> $specifications,
 
@@ -161,6 +161,13 @@ class PackageController extends ActiveController
             ];
         }
         return $specifications;
+    }
+
+    private function getViscosity($pack) {
+        if ($pack->product && $pack->product->viscosity) return [
+            "id"=>$pack->product->viscosity->id,
+            "name"=>$pack->product->viscosity->name,
+        ];
     }
 
     private function getCategories($pack) {
