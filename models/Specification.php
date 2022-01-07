@@ -4,11 +4,11 @@ namespace app\models;
 
 use yii\db\ActiveRecord;
 
-class Category extends ActiveRecord
+class Specification extends ActiveRecord
 { 
     public static function tableName()
     {
-        return '{{Category}}';
+        return '{{Specification}}';
     }
 
     /**

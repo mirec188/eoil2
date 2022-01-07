@@ -3,6 +3,7 @@
 namespace app\models;
 
 use yii\db\ActiveRecord;
+use Yii;
 
 class ProductPack extends ActiveRecord
 { 
@@ -124,7 +125,7 @@ class ProductPack extends ActiveRecord
     }
 
     public function getFullPriceSumDph($pricelistId = 1) {
-        return round($this->getFullPriceSum($pricelistId) * (1 + (Yii::$app->params['dph'] / 100)), 2);
+        return round($this->getFullPriceSum($pricelistId) * (1 + (\Yii::$app->params['dph'] / 100)), 2);
     }
 
     // public function getShopPrice() {
@@ -206,7 +207,7 @@ class ProductPack extends ActiveRecord
             $marza = $priceModel->marza;
             $type = $priceModel->type;
         } else {
-            $pricelist = Pricelist::findByPk($priceListId);
+            $pricelist = Pricelist::findOne($priceListId);
             $typeValue = $pricelist->typeValue;
             $type = $pricelist->type;
             if ($pricelist->staticValue) {
@@ -250,7 +251,7 @@ class ProductPack extends ActiveRecord
 
     public function getPriceValueDph($pricelistId) {
         $priceValue = $this->getPriceValue($pricelistId);
-        return round($priceValue * (1 + (Yii::$app->params['dph'] / 100)), 2);
+        return round($priceValue * (1 + (\Yii::$app->params['dph'] / 100)), 2);
     }
 
     public function getPack() {

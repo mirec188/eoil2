@@ -51,7 +51,8 @@ $config = [
             'enablePrettyUrl' => true,
             'showScriptName' => false,
             'rules' => [
-            ],
+                'package/<id:\d+>' => 'package/view',
+            ]
         ],
         
     ],

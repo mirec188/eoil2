@@ -4,11 +4,11 @@ namespace app\models;
 
 use yii\db\ActiveRecord;
 
-class Category extends ActiveRecord
+class ProductAttributeType extends ActiveRecord
 { 
     public static function tableName()
     {
-        return '{{Category}}';
+        return '{{ProductAttributeType}}';
     }
 
     /**

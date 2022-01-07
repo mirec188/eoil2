@@ -44,16 +44,59 @@ class Product extends ActiveRecord
 	    ];
     }
 
+    public function getCategories() {
+        if (!$this->id) return false;
+        
+        $ids = $this->getCategoryIds();   
+
+        if (!empty($ids)) {
+            $ids = implode(',', $ids);
+            return Category::find()->where("id in ($ids)")->all();
+        }
+
+        return false;
+    }
+
+    public function getCategoryIds() {
+        if (!$this->id) return false;
+        $q = "SELECT categoryId, parentId FROM ProductHasCategory INNER JOIN Category ON ProductHasCategory.categoryId = Category.id WHERE productId = {$this->id} and (parentId <> 0 OR categoryId IN (
+                SELECT id FROM Category WHERE parentId = 0 AND id NOT IN (SELECT id FROM Category WHERE parentId > 0)
+            ))";
+        
+        $result = \Yii::$app->db->createCommand($q)->queryAll();
+
+        $ids = [];
+
+        if ($result) {
+            foreach ($result as $r) {
+                // if ($r['parentId'] > 0) {
+                    $ids[]=$r['categoryId'];    
+                // }
+            }
+        }
+
+        return $ids;
+    }
+
+
     public function getProducer() {
-        return $this->hasOne(Producer::className(), ['id' => 'producerId']);
+        return $this->hasOne(Producer::class, ['id' => 'producerId']);
     }
 
     public function getViscosity() {
-        return $this->hasOne(Viscosity::className(), ['id' => 'viscosityId']);
+        return $this->hasOne(Viscosity::class, ['id' => 'viscosityId']);
     }
 
     public function getProductPacks() {
-        return $this->hasMany(ProductPack::className(), ['productId' => 'id']);
+        return $this->hasMany(ProductPack::class, ['productId' => 'id']);
+    }
+
+    public function getSpecifications() {
+        return $this->hasMany(Specification::class, ['id' => 'specificationId'])->viaTable('SpecificationHasProduct', ['productId' => 'id']);
+    }
+
+    public function getProductAttributes() {
+        return $this->hasMany(ProductAttribute::class, ['productId' => 'id']);
     }
 
 }
