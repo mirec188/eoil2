@@ -44,7 +44,7 @@ class PackageController extends ActiveController
         $packProvider = new ActiveDataProvider([
             'query' => $packQuery,
             'pagination' => [
-                'pageSize' => $_GET['limit'] ? $_GET['limit'] : 10,
+                'pageSize' => isset($_GET['limit']) && $_GET['limit'] ? $_GET['limit'] : 10,
             ],
         ]);
 
