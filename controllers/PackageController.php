@@ -59,6 +59,8 @@ class PackageController extends ActiveController
         $result['filterViscosity'] = $this->getFilterViscosity($packQuery);
         $result['filterSpecification'] = $this->getFilterSpecification($packQuery);
         $result['filterAttributeTypes'] = $this->getFilterAttributeTypes($packQuery);
+
+        $result['pagination'] = $this->getPagination($packProvider);
         return $result;
     }
 
@@ -246,15 +248,20 @@ class PackageController extends ActiveController
         $rawSql = $packQuery->createCommand()->getRawSql();
         $sql = str_replace('SELECT `ProductHasPack`.*', 'SELECT `ProductHasPack`.id', $rawSql);
         $sql = str_replace('SELECT *' , 'SELECT `ProductHasPack`.id', $rawSql);
-        
+        // kolko olejov je takych, co maju taketo specifikacie
+        // vsetky specifikacie a pocet olejov, co maju take
+        //php.id, php.productId, php.packId, shp.specificationId, s.name
         $sql1 = "
-            SELECT s.id, s.name, count(*) as count 
-            FROM SpecificationHasProduct shp
-            LEFT JOIN Specification s ON s.id=shp.specificationId
-            LEFT JOIN ProductHasPack php ON php.productId = shp.productId
-            LEFT JOIN Product p ON p.id=php.productId 
-            WHERE php.active=1 AND php.id in (".$sql.")
-            GROUP BY php.id";
+
+
+        select s.id, s.name, count(*) as count from ProductHasPack php 
+            LEFT JOIN SpecificationHasProduct shp ON php.productId = shp.productId
+            LEFT JOIN Product p ON p.id = php.productId
+            LEFT JOIN Specification s ON s.id=shp.specificationId WHERE php.id IN (
+                $sql
+            )
+        GROUP BY s.id
+        ";
         
         return Yii::$app->db->createCommand($sql1)->queryAll();
         
@@ -266,6 +273,14 @@ class PackageController extends ActiveController
         return $result;
     }
 
+    private function getPagination($packProvider) {
+        return [
+            "page"=>$packProvider->pagination->page+1,
+            "pageCount"=>$packProvider->pagination->pageCount,
+            "pageSize"=>$packProvider->pagination->pageSize,
+            "itemCount"=>$packProvider->pagination->totalCount,
+        ];
+    }
     
 
 }
