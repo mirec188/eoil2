@@ -165,7 +165,7 @@ class ProductPack extends ActiveRecord
         if ($priceModel) {
             $typeValue = $priceModel->typeValue;
         } else {
-            $pricelist = Pricelist::findByPk($pricelistId);
+            $pricelist = Pricelist::findOne($pricelistId);
             $typeValue = $pricelist->typeValue;
         }
         return $typeValue;
@@ -180,7 +180,7 @@ class ProductPack extends ActiveRecord
         if ($priceModel) {
             $typeValue = $priceModel->marza;
         } else {
-            $pricelist = Pricelist::findByPk($pricelistId);
+            $pricelist = Pricelist::findOne($pricelistId);
             if ($pricelist && $pricelist->staticValue) return $pricelist->staticValue;
         }
         return $typeValue;
@@ -249,6 +249,25 @@ class ProductPack extends ActiveRecord
         
     }
 
+    public function getPhtoUrl($size) {
+        $photo = $this->getPhoto();
+        
+        $extension = $photo->getFileExtension();
+        $extension = \app\components\Helpers::stringContains('original', $size) ? $extension : 'png';
+        if ($photo) {
+            $photoUrl = "https://www.eoil.sk". $photo->getFilePath().'/'.$size.'.'.$extension;
+            return $photoUrl;
+        } else {
+            return false;
+        }
+    }
+
+    public function getEoilUrl() {
+        $productName = \app\components\Helpers::normalizeString($this->getFullName());
+        $firstFragment='';
+        return "https://www.eoil.sk".$firstFragment.'/'.$productName.'/'.$this->id;
+    }
+
     public function getPriceValueDph($pricelistId) {
         $priceValue = $this->getPriceValue($pricelistId);
         return round($priceValue * (1 + (\Yii::$app->params['dph'] / 100)), 2);
@@ -261,6 +280,11 @@ class ProductPack extends ActiveRecord
     public function getProduct() {
         return $this->hasOne(Product::class, ['id' => 'productId']);
     }
+
+    public function getPhoto() {
+        return Photo::find()->where('id in (SELECT photoId FROM PhotoHasProductHasPack WHERE active=1 AND productHasPackId = '.$this->id.')')->one();
+    }
+
 
 
 }

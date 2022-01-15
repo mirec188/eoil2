@@ -5,7 +5,7 @@ namespace app\components;
 class Helpers {
 
     public static function D ($arr, $depth = 10, $colors = 1) {
-        CVarDumper::dump($arr, $depth, $colors );
+        // CVarDumper::dump($arr, $depth, $colors );
     }
 
     public static function stringContains($needle, $haystack) {
@@ -43,11 +43,11 @@ class Helpers {
         $arr = explode('.', $file);
         $extension = strtolower($arr[count($arr)-1]);
 
-        return Yii::app()->baseUrl.'/img/'.$extension.'.png';
+        return \Yii::$app->baseUrl.'/img/'.$extension.'.png';
     }
 
     public static function fakePictures() {
-        $result = isset(Yii::app()->params['fake-pictures']) && Yii::app()->params['fake-pictures'];
+        $result = isset(\Yii::$app->params['fake-pictures']) && \Yii::$app->params['fake-pictures'];
         // CVarDumper::dump($result);
         return $result;
     }
@@ -66,7 +66,7 @@ class Helpers {
     }
 
     public static function formatDateToDb($date) {
-        $object = DateTime::createFromFormat('d.m.Y', $date);
+        $object = \DateTime::createFromFormat('d.m.Y', $date);
         if ($object) {
             $time = $object->getTimestamp();
             return date('Y-m-d', $time);
@@ -77,7 +77,7 @@ class Helpers {
 
     public static function dumpToStr($mixed) {
         ob_start();
-        CVarDumper::dump($mixed, 5, 1);
+        // CVarDumper::dump($mixed, 5, 1);
         $m = ob_get_contents();
         ob_end_clean();
         return $m;
@@ -120,13 +120,49 @@ class Helpers {
 
     public static function validateDateTime($date)
     {
-        $d = DateTime::createFromFormat('Y-m-d H:i:s', $date);
+        $d = \DateTime::createFromFormat('Y-m-d H:i:s', $date);
         return $d && $d->format('Y-m-d H:i:s') === $date;
+    }
+
+    public static function normalizeString($str) {
+        $GLOBALS['normalizeChars'] = array(
+            'Š' => 'S', 'š' => 's', 'Đ' => 'Dj', 'đ' => 'dj', 'Ž' => 'Z', 'ž' => 'z', 'Č' => 'C', 'č' => 'c', 'Ć' => 'C', 'ć' => 'c', 'ď' => 'd', 'Ď' => 'D',
+            'À' => 'A', 'Á' => 'A', 'Â' => 'A', 'Ã' => 'A', 'Ä' => 'A', 'Å' => 'A', 'Æ' => 'A', 'Ç' => 'C', 'È' => 'E', 'É' => 'E',
+            'Ê' => 'E', 'Ë' => 'E', 'Ì' => 'I', 'Í' => 'I', 'Î' => 'I', 'Ï' => 'I', 'Ñ' => 'N', 'Ò' => 'O', 'Ó' => 'O', 'Ô' => 'O',
+            'Õ' => 'O', 'Ö' => 'O', 'Ø' => 'O', 'Ù' => 'U', 'Ú' => 'U', 'Û' => 'U', 'Ü' => 'U', 'Ý' => 'Y', 'Þ' => 'B', 'ß' => 'Ss',
+            'à' => 'a', 'á' => 'a', 'â' => 'a', 'ã' => 'a', 'ä' => 'a', 'å' => 'a', 'æ' => 'a', 'ť' => 't', 'è' => 'e', 'é' => 'e',
+            'ê' => 'e', 'ë' => 'e', 'ì' => 'i', 'í' => 'i', 'î' => 'i', 'ï' => 'i', 'ð' => 'o', 'ñ' => 'n', 'ò' => 'o', 'ó' => 'o',
+            'ô' => 'o', 'õ' => 'o', 'ö' => 'o', 'ŕ' => 'r', 'ň' => 'n', 'ú' => 'u', 'û' => 'u', 'ý' => 'y', 'ý' => 'y', 'þ' => 'b',
+            'ÿ' => 'y', 'Ŕ' => 'R', 'ŕ' => 'r', 'ľ' => 'l'
+        );
+
+        //$lower_text = StrToLower($text);
+        $lower_text = mb_strtolower(trim($str), 'UTF-8');
+        $lower_without_diacritics = StrTr($lower_text, $GLOBALS['normalizeChars']);
+        $clean_text = str_replace(" ", "-", $lower_without_diacritics);
+        $clean_text = str_replace('"', "", $clean_text);
+        $clean_text = str_replace(".", "", $clean_text);
+        $clean_text = str_replace("?", "", $clean_text);
+        $clean_text = str_replace("!", "", $clean_text);
+        $clean_text = str_replace("&", "", $clean_text);
+        $clean_text = str_replace("/", "-", $clean_text);
+        $clean_text = str_replace(":", "", $clean_text);
+        $clean_text = str_replace(",", "", $clean_text);
+        
+        $clean_text = str_replace(")", "", $clean_text);
+        $clean_text = str_replace("(", "", $clean_text);
+
+        $clean_text = str_replace("%", "percent", $clean_text);
+        $clean_text = str_replace("--", "-", $clean_text);
+    
+        $clean_text = str_replace("--", "-", $clean_text);
+
+        return $clean_text;
     }
 
     public static function validateDate($date)
     {
-        $d = DateTime::createFromFormat('Y-m-d', $date);
+        $d = \DateTime::createFromFormat('Y-m-d', $date);
         return $d && $d->format('Y-m-d') === $date;
     }
 

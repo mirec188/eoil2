@@ -33,6 +33,7 @@ class PackageController extends ActiveController
         $packQuery = ProductPack::find();
 
         $packQuery->andWhere('active = 1');
+        $packQuery->andWhere("productId in (SELECT productId FROM ProductHasCategory WHERE categoryId in (3,13))");
 
         if ($this->request->getMethod() == 'POST' && $json = json_decode(Yii::$app->request->getRawBody(), true)) {
             $this->updateCondition($packQuery, $json);
@@ -84,7 +85,11 @@ class PackageController extends ActiveController
                 "priceSum" => $pack->getFullPriceSum(1),
                 "priceSumDph" => $pack->getFullPriceSumDph(1)
             ],
-            "eoilUrl" => "",
+            "eoilUrl" => $pack->getEoilUrl(),
+            "image"=> [
+                "originalUrl"=>$pack->getPhtoUrl("original"),
+                "thumbnailUrl"=>$pack->getPhtoUrl("300x500"),
+            ],
             "product"=> [
                 "name"=>$pack->product->name,
                 "fullName"=>$pack->product->getFullName(),
@@ -94,7 +99,6 @@ class PackageController extends ActiveController
                     "id"=>$pack->product->producer->id,
                     "name"=>$pack->product->producer->name,
                 ],
-    
                 "viscosity"=> [
                     "id"=>$pack->product->viscosity->id,
                     "name"=>$pack->product->viscosity->name,
@@ -123,7 +127,11 @@ class PackageController extends ActiveController
                 "priceSum" => $pack->getFullPriceSum(1),
                 "priceSumDph" => $pack->getFullPriceSumDph(1)
             ],
-            "eoilUrl" => "",
+            "eoilUrl" => $pack->getEoilUrl(),
+            "image"=> [
+                "originalUrl"=>$pack->getPhtoUrl("original"),
+                "thumbnailUrl"=>$pack->getPhtoUrl("300x500"),
+            ],
             "product"=> [
                 "name"=>$pack->product->name,
                 "fullName"=>$pack->product->getFullName(),
@@ -206,6 +214,11 @@ class PackageController extends ActiveController
 
     private function updateCondition($packQuery, $json) {
         // $packQuery->andWhere(['product_id' => $json['productId']]);
+
+        if (isset($json['category'])) {
+            $packQuery->andWhere("productId in (SELECT productId FROM ProductHasCategory WHERE categoryId in (".implode(",", $json['category'])."))");
+        }
+
         if (isset($json['viscosity'])) {
             $packQuery->joinWith('product')->andWhere('viscosityId in ('.implode(',', $json['viscosity']).')');
         }
