@@ -28,4 +28,8 @@ class Category extends ActiveRecord
         return [
 	    ];
     }
+
+    public function getSubcategories() {
+        return $this->hasMany(Category::class, ['parentId' => 'id']);
+    }
 }
