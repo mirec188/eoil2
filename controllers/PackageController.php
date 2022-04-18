@@ -268,6 +268,8 @@ class PackageController extends ActiveController
             LEFT JOIN  Viscosity v ON v.id = p.viscosityId
             WHERE php.active=1 AND php.id in (".$sql.")
             GROUP BY v.id";
+
+        echo $sql1;die();
         
         return Yii::$app->db->createCommand($sql1)->queryAll();
     }
