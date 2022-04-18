@@ -300,8 +300,28 @@ class PackageController extends ActiveController
     }
 
     private function getFilterAttributeTypes($packQuery) {
-        $result = [];
+        $sample = [
+            "id"=>1,
+            "name"=>"Typ zpevnovadla",
+            "values"=>[
+                ["value"=>"LITHIUM",
+                "count" => 2],
+                ["value"=>"CALCIUM",
+                "count" => 2],
+            ]
+        ];
+        $result[] = $sample;
         
+        $sample = [
+            "id"=>2,
+            "name"=>"Viskozita pri 40°C v cSt (ASTM D445)",
+            "values"=>[[
+                "value"=>"100",
+                "count" => 1
+            ]]
+        ];
+        $result[] = $sample;
+
         return $result;
     }
 
