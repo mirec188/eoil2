@@ -269,7 +269,6 @@ class PackageController extends ActiveController
             WHERE php.active=1 AND php.id in (".$sql.")
             GROUP BY v.id";
 
-        echo $sql1;die();
         
         return Yii::$app->db->createCommand($sql1)->queryAll();
     }
