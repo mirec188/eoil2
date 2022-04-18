@@ -18,15 +18,15 @@ class PackageController extends ActiveController
     /**
      * @inheritdoc
      */
-    public function behaviors()
-    {
-        $behaviors = parent::behaviors();
-        $behaviors['authenticator'] = [
-            'class' => \sizeg\jwt\JwtHttpBearerAuth::class,
-        ];
+    // public function behaviors()
+    // {
+    //     $behaviors = parent::behaviors();
+    //     $behaviors['authenticator'] = [
+    //         'class' => \sizeg\jwt\JwtHttpBearerAuth::class,
+    //     ];
 
-        return $behaviors;
-    }
+    //     return $behaviors;
+    // }
 
    
 
