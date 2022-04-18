@@ -50,8 +50,8 @@ class PackageController extends ActiveController
         
         $packQuery = ProductPack::find();
 
-        $packQuery->andWhere('active = 1');
-        $packQuery->andWhere("productId in (SELECT productId FROM ProductHasCategory WHERE categoryId in (3,13))");
+        $packQuery->andWhere('`ProductHasPack`.active = 1');
+        $packQuery->andWhere("`ProductHasPack`.productId in (SELECT productId FROM ProductHasCategory WHERE categoryId in (3,13))");
 
         if ($this->request->getMethod() == 'POST' && $json = json_decode(Yii::$app->request->getRawBody(), true)) {
             $this->updateCondition($packQuery, $json);
