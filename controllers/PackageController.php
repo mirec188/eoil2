@@ -4,14 +4,32 @@ namespace app\controllers;
 
 use yii\rest\ActiveController;
 use \Yii;
-use app\models\Product;
 use app\models\ProductPack;
 use yii\data\ActiveDataProvider;
+
+use sizeg\jwt\Jwt;
+use sizeg\jwt\JwtHttpBearerAuth;
 
 class PackageController extends ActiveController
 {
 
 	public $modelClass = 'app\models\Product';
+
+    /**
+     * @inheritdoc
+     */
+    public function behaviors()
+    {
+        $behaviors = parent::behaviors();
+        $behaviors['authenticator'] = [
+            'class' => \sizeg\jwt\JwtHttpBearerAuth::class,
+        ];
+
+        return $behaviors;
+    }
+
+   
+
 
 	public function actions() {
 	    $actions = parent::actions();
@@ -29,7 +47,7 @@ class PackageController extends ActiveController
     }
 
     public function actionIndex() {
-
+        
         $packQuery = ProductPack::find();
 
         $packQuery->andWhere('active = 1');
@@ -47,7 +65,7 @@ class PackageController extends ActiveController
         $packProvider = new ActiveDataProvider([
             'query' => $packQuery,
             'pagination' => [
-                'pageSize' => isset($_GET['limit']) && $_GET['limit'] ? $_GET['limit'] : 10,
+                'pageSize' => isset($_GET['limit']) && $_GET['limit'] ? $_GET['limit'] : 12,
             ],
         ]);
 
