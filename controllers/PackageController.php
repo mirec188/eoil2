@@ -260,7 +260,7 @@ class PackageController extends ActiveController
     private function getFilterViscosity($packQuery) {
         $rawSql = $packQuery->createCommand()->getRawSql();
         $sql = str_replace('SELECT `ProductHasPack`.*', 'SELECT `ProductHasPack`.id', $rawSql);
-        $sql = str_replace('SELECT *' , 'SELECT `ProductHasPack`.id', $rawSql);
+        $sql = str_replace('SELECT *' , 'SELECT `ProductHasPack`.id', $sql);
         
         $sql1 = "
             SELECT v.id, v.name, count(*) as count FROM ProductHasPack php 
