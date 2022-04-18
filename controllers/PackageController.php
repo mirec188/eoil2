@@ -279,7 +279,7 @@ class PackageController extends ActiveController
         $result = [];
         $rawSql = $packQuery->createCommand()->getRawSql();
         $sql = str_replace('SELECT `ProductHasPack`.*', 'SELECT `ProductHasPack`.id', $rawSql);
-        $sql = str_replace('SELECT *' , 'SELECT `ProductHasPack`.id', $rawSql);
+        $sql = str_replace('SELECT *' , 'SELECT `ProductHasPack`.id', $sql);
         // kolko olejov je takych, co maju taketo specifikacie
         // vsetky specifikacie a pocet olejov, co maju take
         //php.id, php.productId, php.packId, shp.specificationId, s.name
