@@ -322,16 +322,23 @@ class PackageController extends ActiveController
             ";
         $data = \Yii::$app->db->createCommand($q1)->queryAll();
         $values = [];
+        $result = [];
+
+        $tmp = [];
         foreach ($data as $d) {
-            $tmp = [];
-            $tmp['id'] = $d['patId'];
-            $tmp['name'] = $d['name'];
-            $val['value'] = $d['value'];
-            $val['count'] = $d['count'];
-            $tmp['values'][] = $val;
+           
+            $tmp[$d['patId']]['id'] = $d['patId'];
+            $tmp[$d['patId']]['name'] = $d['name'];
+
+            $t['value'] = $d['value'];
+            $t['count'] = $d['count'];
+            $val[$d['patId']]['values'] = $t;
+        
         }
 
-        $result[] = $tmp;
+        foreach ($tmp as $d) {
+            $result[] = $d;
+        }
 
         return $result;
     }
