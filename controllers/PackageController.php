@@ -300,27 +300,38 @@ class PackageController extends ActiveController
     }
 
     private function getFilterAttributeTypes($packQuery) {
-        $sample = [
-            "id"=>1,
-            "name"=>"Typ zpevnovadla",
-            "values"=>[
-                ["value"=>"LITHIUM",
-                "count" => 2],
-                ["value"=>"CALCIUM",
-                "count" => 2],
-            ]
-        ];
-        $result[] = $sample;
-        
-        $sample = [
-            "id"=>2,
-            "name"=>"Viskozita pri 40°C v cSt (ASTM D445)",
-            "values"=>[[
-                "value"=>"100",
-                "count" => 1
-            ]]
-        ];
-        $result[] = $sample;
+
+        $baseIds = "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38";
+
+     
+        $rawSql = $packQuery->createCommand()->getRawSql();
+        $sql = str_replace('SELECT `ProductHasPack`.*', 'SELECT `ProductHasPack`.id', $rawSql);
+        $sql = str_replace('SELECT *' , 'SELECT `ProductHasPack`.id', $sql);
+
+        $q1 = " SELECT pa.productAttributeTypeId as patId, pat.name as name, pa.value as value, count(*) as count 
+                FROM ProductAttribute pa 
+                JOIN ProductAttributeType pat ON pa.productAttributeTypeId = pat.id
+                WHERE productAttributeTypeId 
+                in ($baseIds)
+                AND productId in (
+                    SELECT productId 
+                    FROM (
+                        $sql
+                    ) as x
+                ) group by productAttributeTypeId, pat.name, value
+            ";
+        $data = \Yii::$app->db->createCommand($q1)->queryAll();
+        $values = [];
+        foreach ($data as $d) {
+            $tmp = [];
+            $tmp['id'] = $d['patId'];
+            $tmp['name'] = $d['name'];
+            $val['value'] = $d['value'];
+            $val['count'] = $d['count'];
+            $tmp['values'][] = $val;
+        }
+
+        $result[] = $tmp;
 
         return $result;
     }
