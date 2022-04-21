@@ -332,7 +332,7 @@ class PackageController extends ActiveController
 
             $t['value'] = $d['value'];
             $t['count'] = $d['count'];
-            $val[$d['patId']]['values'] = $t;
+            $tmp[$d['patId']]['values'][]= $t;
         
         }
 
