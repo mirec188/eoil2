@@ -245,7 +245,7 @@ class PackageController extends ActiveController
             $packQuery->andWhere("productId in (SELECT productId FROM SpecificationHasProduct where specificationId in (".implode(',', $json['specification'])."))");
         }
        
-        if (isset($json['attributes'])) {
+        if (isset($json['attributes']) && !empty($json['attributes'])) {
             $attributeWheres = [];
             foreach ($json['attributes'] as $attribute) {
                 $ids = sprintf("'%s'", implode("','", $attribute['values'] ) );
