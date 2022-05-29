@@ -305,6 +305,7 @@ class PackageController extends ActiveController
     private function getFilterAttributeTypes($packQuery) {
 
         $attributeTypes = $this->getAttributeTypes();
+        if (!$attributeTypes) return [];
         $baseIds = implode(",", $attributeTypes);
      
         $rawSql = $packQuery->createCommand()->getRawSql();
