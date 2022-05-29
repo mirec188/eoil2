@@ -50,6 +50,8 @@ class PackageController extends ActiveController
         
         $packQuery = ProductPack::find();
 
+        Yii::debug(Yii::$app->request->getRawBody());
+
         $packQuery->andWhere('`ProductHasPack`.active = 1');
         $packQuery->andWhere("`ProductHasPack`.productId in (SELECT productId FROM ProductHasCategory WHERE categoryId in (3,13))");
 
