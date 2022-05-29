@@ -50,7 +50,7 @@ class PackageController extends ActiveController
         
         $packQuery = ProductPack::find();
 
-        Yii::debug(Yii::$app->request->getRawBody(), 'warning');
+        Yii::debug(Yii::$app->request->getRawBody());
 
         $packQuery->andWhere('`ProductHasPack`.active = 1');
         $packQuery->andWhere("`ProductHasPack`.productId in (SELECT productId FROM ProductHasCategory WHERE categoryId in (3,13))");
@@ -296,7 +296,7 @@ class PackageController extends ActiveController
             LEFT JOIN Product p ON p.id = php.productId
             LEFT JOIN Specification s ON s.id=shp.specificationId WHERE php.id IN (
                 $sql
-            )
+            ) AND php.active=1
         GROUP BY s.id
         ";
         
