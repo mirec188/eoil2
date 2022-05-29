@@ -251,6 +251,9 @@ class ProductPack extends ActiveRecord
 
     public function getPhtoUrl($size) {
         $photo = $this->getPhoto();
+        if (!$photo) {
+            return false;
+        }
         
         $extension = $photo->getFileExtension();
         $extension = \app\components\Helpers::stringContains('original', $size) ? $extension : 'png';

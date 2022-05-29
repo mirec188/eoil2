@@ -6,6 +6,9 @@ use yii\db\ActiveRecord;
 
 class ProductAttribute extends ActiveRecord
 { 
+
+    public $fullName;
+
     public static function tableName()
     {
         return '{{ProductAttribute}}';
@@ -18,6 +21,10 @@ class ProductAttribute extends ActiveRecord
     {
         return [
         ];
+    }
+
+    public function getFullName() {
+        return $this->type->name.' '.$this->type->type;
     }
 
     /**
