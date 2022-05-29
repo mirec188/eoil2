@@ -56,6 +56,7 @@ class PackageController extends ActiveController
         if ($this->request->getMethod() == 'POST' && $json = json_decode(Yii::$app->request->getRawBody(), true)) {
             $this->updateCondition($packQuery, $json);
         }
+        // var_dump($packQuery->createCommand()->getRawSql());die();
 
         $result = [
             "items" => [],
@@ -247,14 +248,16 @@ class PackageController extends ActiveController
         if (isset($json['attributes'])) {
             $attributeWheres = [];
             foreach ($json['attributes'] as $attribute) {
-                $attributeWheres[] = "pa.id = ".$attribute['id']. " AND value IN (".implode(",", $attribute['values']).")";
+                $ids = sprintf("'%s'", implode("','", $attribute['values'] ) );
+                $attributeWheres[] = "pa.productAttributeTypeId= ".$attribute['id']. " AND value IN (".$ids.")";
             }
             $packQuery->andWhere("productId IN ( ".
                 "SELECT productId FROM ProductAttribute pa ".
-                "JOIN ProductAttributeType pat ON pat.id=pa.productAttributeTypeId ".
                 "WHERE (".implode(" OR ", $attributeWheres).") ".
             ")");
         }
+
+        
     }
 
     private function getFilterViscosity($packQuery) {
@@ -301,12 +304,12 @@ class PackageController extends ActiveController
 
     private function getFilterAttributeTypes($packQuery) {
 
-        $baseIds = "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38";
-
+        $attributeTypes = $this->getAttributeTypes();
+        $baseIds = implode(",", $attributeTypes);
      
         $rawSql = $packQuery->createCommand()->getRawSql();
-        $sql = str_replace('SELECT `ProductHasPack`.*', 'SELECT `ProductHasPack`.id', $rawSql);
-        $sql = str_replace('SELECT *' , 'SELECT `ProductHasPack`.id', $sql);
+        $sql = str_replace('SELECT `ProductHasPack`.*', 'SELECT `ProductHasPack`.productId', $rawSql);
+        $sql = str_replace('SELECT *' , 'SELECT `ProductHasPack`.productId', $sql);
 
         $q1 = " SELECT pa.productAttributeTypeId as patId, pat.name as name, pa.value as value, count(*) as count 
                 FROM ProductAttribute pa 
@@ -341,6 +344,12 @@ class PackageController extends ActiveController
         }
 
         return $result;
+    }
+
+    private function getAttributeTypes() {
+        $q = "SELECT id FROM ProductAttributeType where type in ('EOIL_PLASTICKEMAZIVA', 'PLASTICKEMAZIVA')";
+        $data = \Yii::$app->db->createCommand($q)->queryColumn();
+        return $data;
     }
 
     private function getPagination($packProvider) {
