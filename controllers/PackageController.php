@@ -246,6 +246,10 @@ class PackageController extends ActiveController
         if (isset($json['specification'])) {
             $packQuery->andWhere("productId in (SELECT productId FROM SpecificationHasProduct where specificationId in (".implode(',', $json['specification'])."))");
         }
+
+        if (isset($json['fulltext'])) {
+            $packQuery = $this->updateFulltextCondition($packQuery, $json['fulltext']);
+        }
        
         if (isset($json['attributes']) && !empty($json['attributes'])) {
             $attributeWheres = [];
@@ -258,8 +262,23 @@ class PackageController extends ActiveController
                 "WHERE (".implode(" OR ", $attributeWheres).") ".
             ")");
         }
+    }
 
-        
+    private function updateFulltextCondition($packQuery, $fulltext) {
+        $fulltext = trim($fulltext);
+
+        $words = explode(' ', $fulltext);
+        foreach ($words as $word) {
+            if ($word) {
+                $word = trim(strtolower(str_replace('-', '', $word)));
+                $criteriaString = "(Product.name LIKE '%{$word}%' OR Producer.name LIKE '%{$word}%' OR 
+                Product.name LIKE '%{$word}%' OR Producer.name LIKE '%{$word}%' OR 
+                LOWER(REPLACE(Viscosity.name,'-', '')) LIKE '%{$word}%' OR LOWER(REPLACE(Viscosity.name,'-', '')) LIKE '%{$word}%')";
+                $packQuery->joinWith('product')->joinWith('product.producer')->joinWith('product.viscosity')->andWhere($criteriaString);
+            }
+        }
+
+        return $packQuery;
     }
 
     private function getFilterViscosity($packQuery) {
