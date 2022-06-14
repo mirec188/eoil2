@@ -28,8 +28,6 @@ class PackageController extends ActiveController
     //     return $behaviors;
     // }
 
-   
-
 
 	public function actions() {
 	    $actions = parent::actions();
@@ -330,16 +328,17 @@ class PackageController extends ActiveController
         $baseIds = implode(",", $attributeTypes);
      
         $rawSql = $packQuery->createCommand()->getRawSql();
-        $sql = str_replace('SELECT `ProductHasPack`.*', 'SELECT `ProductHasPack`.productId', $rawSql);
-        $sql = str_replace('SELECT *' , 'SELECT `ProductHasPack`.productId', $sql);
+        $sql = str_replace('SELECT `ProductHasPack`.*', 'SELECT `ProductHasPack`.id', $rawSql);
+        $sql = str_replace('SELECT *' , 'SELECT `ProductHasPack`.id', $sql);
 
         $q1 = " SELECT pa.productAttributeTypeId as patId, pat.name as name, pa.value as value, count(*) as count 
                 FROM ProductAttribute pa 
-                JOIN ProductAttributeType pat ON pa.productAttributeTypeId = pat.id
-                WHERE productAttributeTypeId 
+                RIGHT JOIN ProductAttributeType pat ON pa.productAttributeTypeId = pat.id
+                JOIN ProductHasPack php ON php.productId = pa.productId
+                WHERE pa.value IS NOT NULL AND productAttributeTypeId 
                 in ($baseIds)
-                AND productId in (
-                    SELECT productId 
+                AND php.id in (
+                    SELECT id
                     FROM (
                         $sql
                     ) as x
@@ -350,6 +349,7 @@ class PackageController extends ActiveController
         $result = [];
 
         $tmp = [];
+        $foundValues = [];
         foreach ($data as $d) {
            
             $tmp[$d['patId']]['id'] = $d['patId'];
@@ -357,8 +357,31 @@ class PackageController extends ActiveController
 
             $t['value'] = $d['value'];
             $t['count'] = $d['count'];
-            $tmp[$d['patId']]['values'][]= $t;
-        
+            if ($d['value']!=null) {
+                $tmp[$d['patId']]['values'][]= $t;
+                $foundValues[$d['patId']][] = $d['value'];
+            }
+        }
+
+       
+        $allTypes = $this->getBaseAttributeTypeValues($baseIds);
+        foreach ($allTypes as $otherType) {
+
+            if (!isset($tmp[$otherType['id']])) {
+                $tmp[$otherType['id']]['id'] = $otherType['id'];
+                $tmp[$otherType['id']]['name'] = $otherType['name'];
+                $tmp[$otherType['id']]['values'] = [];
+                $foundValues[$otherType['id']] = [];
+            }
+
+            
+            if(isset($foundValues[$otherType['id']]) && !in_array($otherType['value'], $foundValues[$otherType['id']])) {
+                $t['value'] = $otherType['value'];
+                $t['count'] = 0;
+                if ($otherType['value']!=null) {
+                    $tmp[$otherType['id']]['values'][]= $t;
+                }
+            }
         }
 
         foreach ($tmp as $d) {
@@ -381,6 +404,21 @@ class PackageController extends ActiveController
             "pageSize"=>$packProvider->pagination->pageSize,
             "itemCount"=>$packProvider->pagination->totalCount,
         ];
+    }
+
+    private function getBaseAttributeTypeValues($baseIds) {
+        $q = "
+        select pat.name as name, pat.id as id, pa.value as value   FROM ProductAttribute pa 
+        JOIN ProductAttributeType pat ON pat.id=pa.productAttributeTypeId
+        where pat.id in (1,3,5) and pa.productId in (
+        SELECT productId FROM ProductHasPack where active=1 AND productId in (
+        SELECT productId FROM ProductHasCategory WHERE categoryId in (3,13)
+        )
+        )
+        group by pat.name, pat.id, pa.value;
+        ";
+        $data = \Yii::$app->db->createCommand($q)->queryAll();
+        return $data;
     }
     
 
