@@ -92,7 +92,15 @@ class PackageController extends ActiveController
     private function getPackItemDetail($pack) {
         $categories = $this->getCategories($pack);
         $specifications = $this->getSpecifications($pack);
-        return $item = [
+        $viscosity = null;
+        if ($pack->product->viscosity) {
+            $viscosity = [
+                "id"=>$pack->product->viscosity->id,
+                "name"=>$pack->product->viscosity->name,
+            ];
+        }
+
+        $item = [
             'id'=>$pack->id,
             'fullName'=>$pack->getFullName(true, true),
             'amount'=>$pack->pack->amount,
@@ -118,15 +126,14 @@ class PackageController extends ActiveController
                     "id"=>$pack->product->producer->id,
                     "name"=>$pack->product->producer->name,
                 ],
-                "viscosity"=> [
-                    "id"=>$pack->product->viscosity->id,
-                    "name"=>$pack->product->viscosity->name,
-                ],
+                "viscosity"=> $viscosity,
     
                 "specifications"=> $specifications,
                 "additionalAttributes"=> $this->getAdditionalAttributes($pack),
             ],
         ];
+
+        return $item;
     }
 
     private function getPackItem($pack) {
