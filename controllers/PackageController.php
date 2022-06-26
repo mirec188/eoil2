@@ -264,7 +264,7 @@ class PackageController extends ActiveController
             }
             $packQuery->andWhere("productId IN ( ".
                 "SELECT productId FROM ProductAttribute pa ".
-                "WHERE (".implode(" OR ", $attributeWheres).") ".
+                "WHERE (".implode(" AND ", $attributeWheres).") ".
             ")");
         }
     }
