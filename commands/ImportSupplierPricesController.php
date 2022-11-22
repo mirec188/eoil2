@@ -64,7 +64,7 @@ class ImportSupplierPricesController extends Controller
         $handle = fopen($file, "r");
         if ($handle) {
             while (($data = fgetcsv($handle, 1000, ";")) !== FALSE) {
-               $tmp['eId'] = $data[0];
+               $tmp['eId'] = $this->sanitazeId($data[0]);
                $tmp['price'] = $this->sanitazePrice($data[1]);
                $tmp['supplierId'] = $data[2];
                $tmp['eIdType'] = $data[3];
@@ -79,6 +79,10 @@ class ImportSupplierPricesController extends Controller
 
     private function sanitazePrice($price) {
         return str_replace(',', '.', $price);
+    }
+
+    private function sanitazeId($id) {
+        return str_replace(' ', '', $id);
     }
 
 }
