@@ -262,11 +262,19 @@ class PackageController extends ActiveController
                 $ids = sprintf("'%s'", implode("','", $attribute['values'] ) );
                 $attributeWheres[] = "pa.productAttributeTypeId= ".$attribute['id']. " AND value IN (".$ids.")";
             }
-            $packQuery->andWhere("productId IN ( ".
-                "SELECT productId FROM ProductAttribute pa ".
-                "WHERE (".implode(" AND ", $attributeWheres).") ".
-            ")");
+
+            $count = count($json['attributes']);
+            $packQuery->andWhere("productId IN (
+                SELECT productId
+                FROM ProductAttribute pa
+                WHERE ".implode(" OR ", $attributeWheres)."
+                GROUP BY productId
+                HAVING COUNT(DISTINCT pa.productAttributeTypeId) = ".$count."
+            )");
         }
+
+  
+
     }
 
     private function updateFulltextCondition($packQuery, $fulltext) {
@@ -309,9 +317,6 @@ class PackageController extends ActiveController
         $rawSql = $packQuery->createCommand()->getRawSql();
         $sql = str_replace('SELECT `ProductHasPack`.*', 'SELECT `ProductHasPack`.id', $rawSql);
         $sql = str_replace('SELECT *' , 'SELECT `ProductHasPack`.id', $sql);
-        // kolko olejov je takych, co maju taketo specifikacie
-        // vsetky specifikacie a pocet olejov, co maju take
-        //php.id, php.productId, php.packId, shp.specificationId, s.name
         $sql1 = "
 
 
