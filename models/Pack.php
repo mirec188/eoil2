@@ -29,9 +29,16 @@ class Pack extends ActiveRecord
 	    ];
     }
 
+	protected function getAmountName() {
+		if (!$this->visible) {
+			return '';
+		}
+		return round($this->amount,2).$this->entity->name;
+	}
+
     public function getFullName() {
 		$entityName = $this->entity ? $this->entity->name : '';
-	    return $this->large.'x'.round($this->amount,2).$entityName .' '.$this->description;
+	    return $this->large.'x'.$this->getAmountName() .' '.$this->description;
 	}
 	
 	public function getEntityName() {
@@ -42,23 +49,23 @@ class Pack extends ActiveRecord
 		
 		if ($this->bigOnly) {
 			$entityName = $this->entity ? $this->entity->name : '';
-			return $this->large.'x'.round($this->amount,2).$entityName.' '.$this->description;
+			return $this->large.'x'.$this->getAmountName().' '.$this->description;
 		}
 
 		$entityName = $this->entity ? $this->entity->name : '';
 		if ($this->description) $entityName.' '.$this->description;
-		return round($this->amount,2).''.$entityName;
+		return $this->getAmountName();
 	}
 
 	public function getShortName() {
 		
 		if ($this->bigOnly) {
 			$entityName = $this->entity ? $this->entity->name : '';
-			return $this->large.'x'.round($this->amount,2).$entityName;
+			return $this->large.'x'.$this->getAmountName();
 		}
 
 		$entityName = $this->entity ? $this->entity->name : '';
-		return round($this->amount,2).''.$entityName;
+		return $this->getAmountName();
 	}
 
     public function getEntity() {
